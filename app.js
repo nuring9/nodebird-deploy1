@@ -9,7 +9,7 @@ const passport = require("passport");
 const helmet = require("helmet");
 const hpp = require("hpp");
 const redis = require("redis");
-const RedisStore = require("connect-redis")(session);
+const RedisStore = require("connect-redis").default;
 
 dotenv.config(); // 위치 중요
 const redisClient = redis.createClient({
@@ -17,6 +17,7 @@ const redisClient = redis.createClient({
   password: process.env.REDIS_PASSWORD,
   legacyMode: true,
 });
+
 redisClient.connect().catch(console.error);
 
 const pageRouter = require("./routes/page");
