@@ -15,9 +15,8 @@ dotenv.config(); // 위치 중요
 const redisClient = redis.createClient({
   url: `redis://${process.env.REDIS_HOST}:${process.env.REDIS_PORT}`,
   password: process.env.REDIS_PASSWORD,
-  legacyMode: true,
+  legacyMode: false,
 });
-
 redisClient.connect().catch(console.error);
 
 const pageRouter = require("./routes/page");
