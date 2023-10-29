@@ -3,9 +3,9 @@ const Hashtag = require("../models/hashtag");
 
 exports.afterUploadImage = (req, res) => {
   // 이미지 업로드 하는 부분.
-  // single은 req.file , array와 files는 req.files가 생성됨.
-  console.log(req.file); // req.file에 뭐가 있는지 확인차 콘솔.
-  res.json({ url: `/img/${req.file.filename}` }); // 업로드된 url을 프론트로 보내준다. 프론트에서는 나중에 게시글을 업로드할때 이 url을 같이 보낸다.
+  const originalUrl = req.file.location;
+  const url = originalUrl.replace(/\/original\//, "/thumb/");
+  res.json({ url, originalUrl });
 };
 
 exports.uploadImage = async (req, res, next) => {

@@ -2,9 +2,11 @@ const express = require("express");
 const fs = require("fs"); // 파일 조작
 const path = require("path");
 const multer = require("multer");
-const { isLoggedIn, isNotLoggedIn } = require("../middlewares/index");
+const { isLoggedIn } = require("../middlewares");
 const router = express.Router();
 const { afterUploadImage, uploadImage } = require("../controllers/post");
+const { S3Client } = require("@aws-sdk/client-s3");
+const multerS3 = require("multer-s3");
 
 try {
   fs.readdirSync("uploads"); // uploads라는 폴더가 있는지 확인.  readdirSync: 동기방식으로 파일을 불러옴.
@@ -13,18 +15,22 @@ try {
   fs.mkdirSync("uploads"); // 없으면 폴더 만들기.   mkdirSync: Directory 생성.
 }
 
+const s3 = new S3Client({
+  // s3 연결
+  credentials: {
+    accessKeyId: process.env.S3_ACCESS_KEY_ID,
+    secretAccessKey: process.env.S3_SECRET_ACCESS_KEY,
+  },
+  region: "ap-northeast-2", // 본인 지역 : 서울인지역
+});
+
 const upload = multer({
-  // nmulter 설정.
-  storage: multer.diskStorage({
-    // 어디에 저장할 것인가, 우리는 사용자가 업로드한 것을 disk에 저장한다.
-    destination(req, file, cb) {
-      cb(null, "uploads/"); // uploads폴더에 저장.
-    },
-    filename(req, file, cb) {
-      // 파일 이름 설정
-      const ext = path.extname(file.originalname);
-      // 확장자 추출.  이미지.png -> 이미지2023090234.png = 이미지+날짜스트링.png
-      cb(null, path.basename(file.originalname, ext) + Date.now() + ext); // 파일명에 확장자를 분리 시킨뒤 사이에 날짜를 넣고 다시 확장자를 넣어 줌.
+  // storage가 multerS3로 바뀐다.
+  storage: multerS3({
+    s3,
+    bucket: "nodebirdbook2", // 내 버킷이름
+    key(req, file, cb) {
+      cb(null, `original/${Date.now()}_${file.originalname}`); // 나중에 람다를 위해 original/라는 폴더를 추가함.
     },
   }),
   Limits: { fileSize: 5 * 1024 * 1024 }, // 파일 사이즈 5mg bite가 작을수도 있으니 변경 가능.

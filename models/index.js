@@ -1,8 +1,8 @@
 const Sequelize = require("sequelize");
+const env = process.env.NODE_ENV || "development";
 const fs = require("fs"); // 폴더 파일 읽을 수 있는 모듈
 const path = require("path"); // 읽을 파일 경로 가져올수 있는 모듈
 
-const env = process.env.NODE_ENV || "development";
 const config = require("../config/config")[env]; // sequelize 연결
 
 const db = {};
